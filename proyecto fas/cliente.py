@@ -1,7 +1,6 @@
 """
 cliente.py
-Clase Cliente — solo pide nombre y estrato.
-El estrato determina el descuento sobre el total de la venta.
+Clase Cliente — nombre y estrato determinan el descuento.
 
 Estrato 1 → 10%
 Estrato 2 →  5%
@@ -19,8 +18,3 @@ class Cliente:
 
     def descuento_pct(self):
         return DESCUENTOS_ESTRATO.get(self.estrato, 0)
-
-    def mostrar_datos(self):
-        d = self.descuento_pct()
-        print(f"  Cliente : {self.nombre}")
-        print(f"  Estrato : {self.estrato}  →  Descuento total: {d}%")
