@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Catálogo — Gloriana{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Catálogo</h2>
+    <p class="page-sub">
+      Bienvenido, <strong>{{ cliente.nombre }}</strong> · Estrato {{ cliente.estrato }}
+      {% if cliente.descuento_pct > 0 %}
+        · <span class="badge badge-success">Desc. {{ cliente.descuento_pct }}%</span>
+      {% endif %}
+    </p>
+  </div>
+  <a href="{{ url_for('carrito_ver') }}" class="btn btn-outline">
+    🛒 Ver carrito
+    {% set n_total = carrito.values()|sum(attribute='cant') %}
+    {% if n_total > 0 %}<span class="cart-badge">{{ n_total }}</span>{% endif %}
+  </a>
+</div>
+
+<!-- Pestañas de categoría -->
+<div class="tabs">
+  {% for cat in catalogo.keys() %}
+    <a href="{{ url_for('catalogo', cat=cat) }}"
+       class="tab {% if cat == cat_activa %}active{% endif %}">
+      {{ cat }}
+    </a>
+  {% endfor %}
+</div>
+
+<!-- Tabla de la categoría activa -->
+{% if cat_activa in catalogo %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Producto</th>
+          <th>Presentación</th>
+          <th>Precio unitario</th>
+          <th>Condiciones</th>
+          <th>Stock</th>
+          <th>Cantidad</th>
+          <th>Agregar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in catalogo[cat_activa] %}
+        <tr>
+          <td class="td-code">{{ p.codigo }}</td>
+          <td class="td-nombre">{{ p.nombre }}</td>
+          <td>
+            {% if p.presentacion %}
+              <span class="badge badge-neutral">{{ p.presentacion }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td class="td-precio">${{ "{:,.0f}".format(p.precio) }}</td>
+          <td>
+            {% if p.tiene_iva %}
+              <span class="badge badge-info">+IVA 19%</span>
+            {% endif %}
+            {% if p.tiene_descuento %}
+              <span class="badge badge-warning">Desc. 10%</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if p.cantidad <= 5 %}
+              <span class="stock-low">{{ p.cantidad }} unid.</span>
+            {% else %}
+              <span class="stock-ok">{{ p.cantidad }} unid.</span>
+            {% endif %}
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('carrito_agregar') }}" class="form-inline">
+              <input type="hidden" name="codigo" value="{{ p.codigo }}"/>
+              <input type="hidden" name="cat_activa" value="{{ cat_activa }}"/>
+              <input type="number" name="cantidad" value="1" min="1" max="{{ p.cantidad }}"
+                     class="input-qty"/>
+            </form>
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('carrito_agregar') }}" class="form-inline">
+              <input type="hidden" name="codigo" value="{{ p.codigo }}"/>
+              <input type="hidden" name="cat_activa" value="{{ cat_activa }}"/>
+              <input type="hidden" name="cantidad" value="1"/>
+              <button type="submit" class="btn btn-sm btn-add">+ Agregar</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="empty-state">No hay productos disponibles en esta categoría.</div>
+{% endif %}
+{% endblock %}

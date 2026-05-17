@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Admin — Gloriana{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Panel de Administrador</h2>
+    <p class="page-sub">Estanquillo Gloriana · {{ total_ref }} referencias en inventario</p>
+  </div>
+  <a href="{{ url_for('index') }}" class="btn btn-outline">← Inicio</a>
+</div>
+
+<!-- Formulario agregar producto -->
+<details class="collapsible">
+  <summary class="collapsible-title">➕ Agregar nuevo producto</summary>
+  <div class="collapsible-body">
+    <form method="POST" action="{{ url_for('admin_agregar') }}" class="admin-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre del producto</label>
+          <input type="text" name="nombre" placeholder="Ej: Pepsi" required/>
+        </div>
+        <div class="form-group">
+          <label>Categoría</label>
+          <select name="categoria" id="sel-cat" onchange="actualizarPres()">
+            {% for k, v in categorias.items() %}
+              <option value="{{ v }}">{{ v }}{% if v in cats_iva %} (IVA 19%){% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" id="grp-pres">
+          <label>Presentación</label>
+          <select name="presentacion" id="sel-pres">
+            {% for k, v in presentaciones.items() %}
+              <option value="{{ v }}">{{ v }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Precio unitario ($)</label>
+          <input type="number" name="precio" min="1" step="1" placeholder="2000" required/>
+        </div>
+        <div class="form-group">
+          <label>Cantidad inicial</label>
+          <input type="number" name="cantidad" min="0" placeholder="10" required/>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Agregar producto</button>
+    </form>
+  </div>
+</details>
+
+<!-- Formulario reabastecer -->
+<details class="collapsible">
+  <summary class="collapsible-title">📦 Reabastecer producto existente</summary>
+  <div class="collapsible-body">
+    <form method="POST" action="{{ url_for('admin_reabastecer') }}" class="admin-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Código del producto</label>
+          <input type="number" name="codigo" min="1" placeholder="1" required/>
+        </div>
+        <div class="form-group">
+          <label>Unidades a agregar</label>
+          <input type="number" name="unidades" min="1" placeholder="20" required/>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Reabastecer</button>
+    </form>
+  </div>
+</details>
+
+<!-- Inventario completo por categoría -->
+<h3 class="section-title" style="margin-top:2rem">Inventario completo</h3>
+
+{% for cat, prods in inventario.items() %}
+<div class="inv-section">
+  <div class="inv-cat-title">{{ cat }}</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Producto</th>
+          <th>Presentación</th>
+          <th>Precio unitario</th>
+          <th>IVA</th>
+          <th>Desc. especial</th>
+          <th>Stock</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in prods %}
+        <tr class="{% if p.cantidad == 0 %}row-agotado{% endif %}">
+          <td class="td-code">{{ p.codigo }}</td>
+          <td class="td-nombre">{{ p.nombre }}</td>
+          <td>
+            {% if p.presentacion %}
+              <span class="badge badge-neutral">{{ p.presentacion }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td class="td-precio">${{ "{:,.0f}".format(p.precio) }}</td>
+          <td>
+            {% if p.tiene_iva %}
+              <span class="badge badge-info">Sí (19%)</span>
+            {% else %}
+              <span class="text-muted">No</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if p.tiene_descuento %}
+              <span class="badge badge-warning">Sí (10%)</span>
+            {% else %}
+              <span class="text-muted">No</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if p.cantidad == 0 %}
+              <span class="badge badge-danger">⚠ Agotado</span>
+            {% elif p.cantidad <= 5 %}
+              <span class="stock-low">{{ p.cantidad }} unid.</span>
+            {% else %}
+              <span class="stock-ok">{{ p.cantidad }} unid.</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endfor %}
+
+<script>
+const PRES_BEBIDAS = {{ presentaciones.values()|list|tojson }};
+const TALLAS      = {{ tallas.values()|list|tojson }};
+function actualizarPres(){
+  const cat = document.getElementById("sel-cat").value;
+  const grp = document.getElementById("grp-pres");
+  const sel = document.getElementById("sel-pres");
+  let opciones = [];
+  if(cat === "Bebidas" || cat === "Licores") opciones = PRES_BEBIDAS;
+  else if(cat === "Snacks") opciones = TALLAS;
+  if(opciones.length){
+    grp.style.display = "";
+    sel.innerHTML = opciones.map(v => `<option value="${v}">${v}</option>`).join("");
+  } else {
+    grp.style.display = "none";
+    sel.innerHTML = `<option value="">— Sin presentación —</option>`;
+  }
+}
+actualizarPres();
+</script>
+{% endblock %}
