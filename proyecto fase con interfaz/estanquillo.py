@@ -13,7 +13,7 @@ CATEGORIAS_ORDEN = ["Bebidas", "Licores", "Cigarrillos", "Snacks"]
 
 class Estanquillo:
     NOMBRE = "Gloriana"
-    DUENO  = "Doña Gloria"
+    
 
     def __init__(self):
         Producto._contador = 1

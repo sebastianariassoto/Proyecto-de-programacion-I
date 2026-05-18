@@ -323,7 +323,7 @@ def main():
         print("\n")
         print("=" * 68)
         print(f"{'ESTANQUILLO  GLORIANA':^68}")
-        print(f"{'Dona Gloria -- Manizales':^68}")
+        
         print("=" * 68)
         print("  [1]  Soy CLIENTE   -> realizar compra")
         print("  [2]  Soy ADMIN     -> administrar inventario")

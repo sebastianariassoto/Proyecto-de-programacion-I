@@ -1,19 +1,5 @@
 """
-app.py — Estanquillo Gloriana (Flask)
-======================================
-Rutas:
-  GET  /                  → pantalla bienvenida (elegir cliente o admin)
-  GET  /cliente           → formulario datos cliente
-  POST /cliente           → guardar cliente en sesión → redirige a catálogo
-  GET  /catalogo          → catálogo en tabla horizontal por categoría
-  POST /carrito/agregar   → agregar producto al carrito
-  POST /carrito/cambiar   → cambiar cantidad en carrito
-  POST /carrito/eliminar  → eliminar ítem del carrito
-  GET  /carrito           → ver carrito con resumen de totales
-  POST /tiquete           → generar y mostrar tiquete final
-  GET  /admin             → panel admin (inventario completo)
-  POST /admin/agregar     → agregar nuevo producto
-  POST /admin/reabastecer → reabastecer producto existente
+
 """
 
 from flask import (Flask, render_template, request, redirect,

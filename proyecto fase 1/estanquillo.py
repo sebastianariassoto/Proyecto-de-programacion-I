@@ -19,7 +19,7 @@ def _ancho_terminal():
 
 class Estanquillo:
     NOMBRE = "Gloriana"
-    DUENO  = "Carlos"
+   
 
     # Filas por pagina al mostrar inventario (0 = sin paginacion)
     FILAS_POR_PAGINA = 20
