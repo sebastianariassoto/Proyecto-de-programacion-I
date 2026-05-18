@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Tiquete — Gloriana{% endblock %}
+
+{% block content %}
+<div class="tiquete-page">
+  <div class="tiquete-card">
+    <div class="tiquete-header">
+      <div class="tiq-store">ESTANQUILLO 'GLORIANA'</div>
+      <div class="tiq-subtitle">TIQUETE DE VENTA</div>
+      <div class="tiq-sep-dashed"></div>
+      <table class="tiq-info">
+        <tr><td class="tiq-label">Cliente</td><td>{{ desglose.cliente.nombre }}</td></tr>
+        <tr><td class="tiq-label">Estrato</td><td>{{ desglose.cliente.estrato }}</td></tr>
+        <tr><td class="tiq-label">Fecha</td><td>{{ desglose.fecha }}</td></tr>
+      </table>
+    </div>
+
+    <div class="tiq-sep-dashed"></div>
+
+    <!-- Tabla de productos -->
+    <div class="table-wrap tiq-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cant.</th>
+            <th>Precio unit.</th>
+            <th>Subtotal</th>
+            <th>Desc. esp.</th>
+            <th>IVA 19%</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in desglose.lineas %}
+          <tr>
+            <td class="td-nombre">{{ l.nombre }}</td>
+            <td class="text-center">× {{ l.cant }}</td>
+            <td>${{ "{:,.0f}".format(l.precio_unit) }}</td>
+            <td class="td-precio">${{ "{:,.0f}".format(l.base) }}</td>
+            <td>
+              {% if l.d_cat_pct > 0 %}
+                <span class="text-success">−${{ "{:,.0f}".format(l.d_cat) }}</span>
+                <span class="tiq-note">({{ l.d_cat_pct }}%)</span>
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              {% if l.tiene_iva %}
+                +${{ "{:,.0f}".format(l.iva) }}
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tiq-sep-dashed"></div>
+
+    <!-- Totales -->
+    <div class="tiq-totales">
+      <div class="res-row">
+        <span>Subtotal bruto</span>
+        <span>${{ "{:,.0f}".format(desglose.subtotal) }}</span>
+      </div>
+      {% if desglose.desc_cat > 0 %}
+      <div class="res-row text-success">
+        <span>Descuento especial (chocolatina / papa)</span>
+        <span>−${{ "{:,.0f}".format(desglose.desc_cat) }}</span>
+      </div>
+      {% endif %}
+      {% if desglose.desc_est_pct > 0 %}
+      <div class="res-row text-success">
+        <span>Descuento estrato {{ desglose.desc_est_pct }}%</span>
+        <span>−${{ "{:,.0f}".format(desglose.desc_est) }}</span>
+      </div>
+      {% endif %}
+      {% if desglose.iva > 0 %}
+      <div class="res-row">
+        <span>IVA 19% (Bebidas y Snacks)</span>
+        <span>+${{ "{:,.0f}".format(desglose.iva) }}</span>
+      </div>
+      {% endif %}
+      <div class="res-row res-total">
+        <span>TOTAL A PAGAR</span>
+        <span>${{ "{:,.0f}".format(desglose.total) }}</span>
+      </div>
+    </div>
+
+    <div class="tiq-sep-dashed"></div>
+    <p class="tiq-gracias">¡Gracias por su compra! Vuelva pronto 🙏</p>
+
+    <div class="tiq-actions">
+      <a href="{{ url_for('catalogo') }}" class="btn btn-primary">Nueva compra</a>
+      <a href="{{ url_for('index') }}" class="btn btn-outline">Inicio</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

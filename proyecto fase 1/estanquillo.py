@@ -1,7 +1,4 @@
-"""
-estanquillo.py — Estanquillo Gloriana
-Inventario en memoria RAM con gaseosas, snacks, licores y cigarrillos.
-"""
+
 
 import os
 import shutil

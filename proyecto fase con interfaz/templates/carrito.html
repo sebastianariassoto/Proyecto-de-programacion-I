@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Carrito — Gloriana{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Mi carrito</h2>
+    <p class="page-sub">{{ cliente.nombre }} · Estrato {{ cliente.estrato }}</p>
+  </div>
+  <a href="{{ url_for('catalogo') }}" class="btn btn-outline">← Seguir comprando</a>
+</div>
+
+{% if carrito %}
+  <!-- Tabla horizontal del carrito -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Categoría</th>
+          <th>Presentación</th>
+          <th>Precio unit.</th>
+          <th>Cantidad</th>
+          <th>Subtotal</th>
+          <th>Desc. esp.</th>
+          <th>IVA 19%</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cod, item in carrito.items() %}
+        {% set base = item.precio * item.cant %}
+        {% set n = item.nombre_base | lower %}
+        {% set tiene_desc = ('chocolate' in n or 'chocolatina' in n or 'papa' in n) %}
+        {% set tiene_iva  = item.categoria in ['Bebidas','Snacks'] %}
+        {% set d_cat = base * 0.10 if tiene_desc else 0 %}
+        {% set iva   = (base - d_cat) * 0.19 if tiene_iva else 0 %}
+        <tr>
+          <td class="td-nombre">{{ item.nombre }}</td>
+          <td><span class="badge badge-neutral">{{ item.categoria }}</span></td>
+          <td>{{ item.presentacion }}</td>
+          <td>${{ "{:,.0f}".format(item.precio) }}</td>
+          <td>
+            <div class="qty-ctrl">
+              <form method="POST" action="{{ url_for('carrito_cambiar') }}" style="display:inline">
+                <input type="hidden" name="codigo" value="{{ cod }}"/>
+                <input type="hidden" name="delta" value="-1"/>
+                <button type="submit" class="qty-btn">−</button>
+              </form>
+              <span class="qty-val">{{ item.cant }}</span>
+              <form method="POST" action="{{ url_for('carrito_cambiar') }}" style="display:inline">
+                <input type="hidden" name="codigo" value="{{ cod }}"/>
+                <input type="hidden" name="delta" value="1"/>
+                <button type="submit" class="qty-btn">+</button>
+              </form>
+            </div>
+          </td>
+          <td class="td-precio">${{ "{:,.0f}".format(base) }}</td>
+          <td>
+            {% if tiene_desc %}
+              <span class="text-success">−${{ "{:,.0f}".format(d_cat) }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if tiene_iva %}
+              +${{ "{:,.0f}".format(iva) }}
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('carrito_eliminar') }}">
+              <input type="hidden" name="codigo" value="{{ cod }}"/>
+              <button type="submit" class="btn btn-sm btn-danger">🗑</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Resumen de totales -->
+  {% if resumen %}
+  <div class="resumen-card">
+    <h3>Resumen de la compra</h3>
+    <div class="resumen-tabla">
+      <div class="res-row">
+        <span>Subtotal bruto</span>
+        <span>${{ "{:,.0f}".format(resumen.subtotal) }}</span>
+      </div>
+      {% if resumen.desc_cat > 0 %}
+      <div class="res-row text-success">
+        <span>Descuento especial (chocolatina / papa)</span>
+        <span>−${{ "{:,.0f}".format(resumen.desc_cat) }}</span>
+      </div>
+      {% endif %}
+      {% if resumen.desc_est_pct > 0 %}
+      <div class="res-row text-success">
+        <span>Descuento estrato {{ resumen.desc_est_pct }}%</span>
+        <span>−${{ "{:,.0f}".format(resumen.desc_est) }}</span>
+      </div>
+      {% endif %}
+      {% if resumen.iva > 0 %}
+      <div class="res-row">
+        <span>IVA 19% (Bebidas y Snacks)</span>
+        <span>+${{ "{:,.0f}".format(resumen.iva) }}</span>
+      </div>
+      {% endif %}
+      <div class="res-row res-total">
+        <span>Total a pagar</span>
+        <span>${{ "{:,.0f}".format(resumen.total) }}</span>
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('tiquete') }}">
+      <button type="submit" class="btn btn-primary btn-full btn-lg">
+        Finalizar compra y generar tiquete →
+      </button>
+    </form>
+  </div>
+  {% endif %}
+
+{% else %}
+  <div class="empty-state">
+    <p>🛒 El carrito está vacío.</p>
+    <a href="{{ url_for('catalogo') }}" class="btn btn-primary">Ver catálogo</a>
+  </div>
+{% endif %}
+{% endblock %}
